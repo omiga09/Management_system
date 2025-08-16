@@ -1,7 +1,7 @@
 package com.omar.Management_System.Configuration;
 
-import com.omar.Management_System.Authintication.CustomerUserDetails;
-import com.omar.Management_System.Authintication.CustomerUserDetailsService;
+import com.omar.Management_System.Authintication.CustomerUserDetails.CustomerUserDetails;
+import com.omar.Management_System.Authintication.CustomerUserDetailsService.CustomerUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,13 +38,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                     FilterChain chain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        String email = null;
-        String jwt = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
-            email = jwtUtil.extractUsername(jwt);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            chain.doFilter(request, response);
+            return;
         }
+
+        String jwt = authHeader.substring(7);
+        String email = jwtUtil.extractUsername(jwt);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             CustomerUserDetails userDetails = (CustomerUserDetails) userDetailsService.loadUserByUsername(email);

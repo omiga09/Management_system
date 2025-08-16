@@ -1,6 +1,6 @@
 package com.omar.Management_System.Configuration;
 
-import com.omar.Management_System.Authintication.CustomerUserDetailsService;
+import com.omar.Management_System.Authintication.CustomerUserDetailsService.CustomerUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -32,13 +32,35 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/seller/**").hasRole("SELLER")
-                        .requestMatchers("/api/buyer/**").hasRole("BUYER")
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+                                .requestMatchers("/api/auth/**").permitAll()
+
+
+                                .requestMatchers("/api/reservations/**").hasRole("BUYER")
+
+
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/users/**").hasRole("ADMIN")
+                                .requestMatchers("/api/properties/search").hasRole("BUYER")
+                                .requestMatchers("/api/properties/{id}/approve").hasRole("ADMIN")
+                                .requestMatchers("/api/transactions/**").hasAnyRole("ADMIN", "BUYER")
+                                .requestMatchers("/api/transactions/reservation/**").hasAuthority("BUYER")
+
+
+
+                                .requestMatchers("/api/seller/**").hasRole("SELLER")
+                                .requestMatchers("/api/buyer/**").hasRole("BUYER")
+
+
+                                .requestMatchers("/api/properties/admin").hasRole("ADMIN")
+                                .requestMatchers("/api/properties/**").hasAnyRole("ADMIN", "SELLER","BUYER")
+
+
+
+                                .anyRequest().authenticated()
+                        )
+
+                        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
